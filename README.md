@@ -1,2 +1,2 @@
 # docker-arti
-A Docker image of an implementation of Tor in Rust
+A Docker image of Arti: an implementation of Tor in Rust
