@@ -21,3 +21,7 @@ curl \
   --socks5-hostname localhost:9150 \
   https://check.torproject.org/api/ip
 ```
+
+### Tips
+
+Don't tip me, please tip the [Tor Project](https://donate.torproject.org)
