@@ -22,6 +22,6 @@ curl \
   https://check.torproject.org/api/ip
 ```
 
-### Tips
+## Tips
 
 Don't tip me, please tip the [Tor Project](https://donate.torproject.org)
