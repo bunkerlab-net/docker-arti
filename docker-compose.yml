@@ -1,0 +1,9 @@
+services:
+  arti:
+    container_name: arti
+    image: ghcr.io/bunkerlab-net/arti
+    command:
+      - arti
+      - proxy
+    ports:
+      - 9150:9150
