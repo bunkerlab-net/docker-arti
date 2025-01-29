@@ -66,20 +66,14 @@ jobs:
         id: meta
         with:
           images: ghcr.io/${{ github.repository_owner }}/arti
-          flavor: |
-            latest=auto
-            prefix=
-            suffix=
           tags: |
-            # For non-tag events (master branch)
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
+            # For non-tag events
             type=ref,event=branch
             type=ref,event=pr
-            # For tag events, generate semantic versions
-            type=match,pattern=arti-v?(.*),group=1
-            type=semver,pattern={{version}},value=${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
-            type=semver,pattern={{major}},value=${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+            # For tag events, generate versions
+            type=match,pattern=arti-v(\d+\.\d+\.\d+),group=1
+            type=match,pattern=arti-v(\d+\.\d+),group=1
+            type=match,pattern=arti-v(\d+),group=1
       - name: Package and Push
         uses: docker/build-push-action@v6
         with:
