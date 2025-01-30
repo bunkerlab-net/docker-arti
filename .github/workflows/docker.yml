@@ -75,7 +75,7 @@ jobs:
             type=raw,value=nightly,enable=${{ github.event_name == 'schedule' }}
             type=raw,value={{date 'YYYYMMDD'}},enable=${{ github.event_name == 'schedule' }}
             # For non-tag events
-            type=ref,event=branch
+            type=ref,event=branch,enable=${{ github.event_name != 'schedule' }}
             type=ref,event=pr
             # For tag events, generate versions
             type=match,pattern=arti-v(\d+\.\d+\.\d+),group=1
