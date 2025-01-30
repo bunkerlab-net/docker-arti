@@ -2,7 +2,8 @@
 
 A Docker image of Arti: an implementation of Tor in Rust
 
-![Latest Built Tag](https://img.shields.io/github/v/tag/bunkerlab-net/docker-arti?label=Latest%20Built%20Tag) ![Arti Tag](https://img.shields.io/gitlab/v/tag/tpo%2Fcore%2Farti?gitlab_url=https%3A%2F%2Fgitlab.torproject.org&label=Latest%20Arti%20Tag)
+[![Latest Built Tag](https://img.shields.io/github/v/tag/bunkerlab-net/docker-arti?label=Latest%20Built%20Tag)](https://ghcr.io/bunkerlab-net/arti)
+[![Arti Tag](https://img.shields.io/gitlab/v/tag/tpo%2Fcore%2Farti?gitlab_url=https%3A%2F%2Fgitlab.torproject.org&label=Latest%20Arti%20Tag)](https://gitlab.torproject.org/tpo/core/arti/-/tags)
 
 ## Usage
 
