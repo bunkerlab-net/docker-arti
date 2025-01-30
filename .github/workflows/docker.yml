@@ -2,6 +2,8 @@ name: Docker
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # midnight UTC every day
   push:
     branches:
       - master
@@ -36,8 +38,10 @@ jobs:
         with:
           platforms: linux/${{ matrix.arch }}
           push: false
-          build-args: |
-            ${{ startsWith(github.ref, 'refs/tags/') && format('VERSION={0}', github.ref_name) || '' }}
+          build-args: >-
+            ${{ github.event_name == 'schedule' && 'VERSION=main' ||
+                startsWith(github.ref, 'refs/tags/') && format('VERSION={0}', github.ref_name) || '' }}
+          no-cache: ${{ github.event_name == 'schedule' }}
           cache-from: |
             type=gha,scope=docker-build-${{ matrix.arch }}
           cache-to: |
@@ -67,6 +71,9 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/arti
           tags: |
+            # For scheduled nightly builds
+            type=raw,value=nightly,enable=${{ github.event_name == 'schedule' }}
+            type=raw,value={{date 'YYYYMMDD'}},enable=${{ github.event_name == 'schedule' }}
             # For non-tag events
             type=ref,event=branch
             type=ref,event=pr
@@ -80,8 +87,9 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            ${{ startsWith(github.ref, 'refs/tags/') && format('VERSION={0}', github.ref_name) || '' }}
+          build-args: >-
+            ${{ github.event_name == 'schedule' && 'VERSION=main' ||
+                startsWith(github.ref, 'refs/tags/') && format('VERSION={0}', github.ref_name) || '' }}
           push: true
           cache-from: |
             type=gha,scope=docker-package
