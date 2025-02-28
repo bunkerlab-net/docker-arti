@@ -1,7 +1,7 @@
 ###################
 # --- builder --- #
 ###################
-FROM docker.io/rust:1.84-alpine AS builder
+FROM docker.io/rust:1.85-alpine AS builder
 
 RUN apk add --update git \
     musl-dev \
