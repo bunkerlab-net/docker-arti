@@ -11,7 +11,7 @@ RUN apk add --update git \
     make
 
 WORKDIR /opt
-ARG VERSION=arti-v1.4.0
+ARG VERSION=arti-v1.4.1
 RUN git clone https://gitlab.torproject.org/tpo/core/arti.git -b $VERSION --depth 1
 WORKDIR /opt/arti
 RUN cargo build --locked --release --package arti --features static
