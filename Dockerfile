@@ -1,7 +1,7 @@
 ###################
 # --- builder --- #
 ###################
-FROM docker.io/rust:1.88-alpine AS builder
+FROM docker.io/rust:1.88-alpine@sha256:63985230b69fbd90528857dabf261379eb47f285ccc69f577d17c3dfde721deb AS builder
 
 RUN apk add --update git \
     musl-dev \
@@ -19,7 +19,7 @@ RUN cargo build --locked --release --package arti --features static
 ##################
 # --- runner --- #
 ##################
-FROM docker.io/alpine:3
+FROM docker.io/alpine:3@sha256:4bcff63911fcb4448bd4fdacec207030997caf25e9bea4045fa6c8c44de311d1 AS arti
 
 RUN apk add --update --no-cache curl && \
     addgroup -g 65532 arti && \
