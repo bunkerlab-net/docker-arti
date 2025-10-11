@@ -97,6 +97,25 @@ socks_listen = 9150
 #
 #time_granularity = "1s"
 
+# If the experimental `opentelemetry` feature is enabled, spans can be exported
+# to a HTTP(S) URL or to a JSON file in the https://opentelemetry.io format.
+#
+# Note that this information may be extremely sensitive. It is not recommended
+# to use this outside of development and debugging usecases.
+#
+# Only one of `file` or `http` may be specified, due to limitations in the
+# underlying tracing system.
+#
+# For example (not the default):
+#     opentelemetry.file = { path = "~/logs/otel.json" }
+#
+# You can also specify a `batch` option on both `file` and `http` exporters, to
+# configure how the writes are batched. The `http` exporter also supports
+# setting a timeout. If not set, these will all be left at the OpenTelemetry
+# defaults. For example (not the defaults):
+#
+#     opentelemetry.http = {endpoint = "http://localhost:4318/v1/traces", timeout = "15s", batch = { max_queue_size = 1024, max_export_batch_size = 256, scheduled_delay = "5s" } }
+
 [metrics]
 
 # Arti can export metrics, offering a Prometheus scraper endpoint.
@@ -392,9 +411,12 @@ socks_listen = 9150
 [tor_network]
 # List of locations to look in when downloading directory information
 # we don't actually have a directory yet.
+#
 #   fallback_caches = [ <default list is compiled-in > ]
 
-# List of directory authorities which we expect to sign consensus documents.
+# List of directory authorities which we expect to sign consensus documents and
+# to download directory information from, if we are a directory mirror.
+#
 #   authorities = [ <default list is compiled-in > ]
 
 # Channels and their behaviour
@@ -678,3 +700,4 @@ socks_listen = 9150
 # A space-separated list of protocols. Protocols have names like "Cons=4" or "Relay=3".
 #
 #ignore_missing_required_protocols = ""
+
