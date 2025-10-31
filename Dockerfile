@@ -1,7 +1,7 @@
 ###################
 # --- builder --- #
 ###################
-FROM docker.io/rust:1.90-alpine@sha256:b4b54b176a74db7e5c68fdfe6029be39a02ccbcfe72b6e5a3e18e2c61b57ae26 AS builder
+FROM docker.io/rust:1.91-alpine@sha256:a3e3d30122c08c0ed85dcd8867d956f066be23c32ed67a0453bc04ce478ad69b AS builder
 
 RUN apk add --update git \
     musl-dev \
@@ -11,7 +11,7 @@ RUN apk add --update git \
     make
 
 WORKDIR /opt
-ARG VERSION=arti-v1.6.0
+ARG VERSION=arti-v1.7.0
 RUN git clone https://gitlab.torproject.org/tpo/core/arti.git -b $VERSION --depth 1
 WORKDIR /opt/arti
 RUN cargo build --locked --release --package arti --features static
