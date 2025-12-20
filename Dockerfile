@@ -19,7 +19,7 @@ RUN cargo build --locked --release --package arti --features static
 ##################
 # --- runner --- #
 ##################
-FROM docker.io/alpine:3@sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375 AS arti
+FROM docker.io/alpine:3@sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62 AS arti
 
 RUN apk add --update --no-cache curl && \
     addgroup -g 65532 arti && \
