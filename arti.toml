@@ -36,13 +36,24 @@
 
 # Set up the Arti program to run as a proxy.
 [proxy]
-# Default port to use when listening to SOCKS connections.  We always
-# listen on localhost.
+# Default port to use when listening to SOCKS connections
+# (We listen on the loopback addresses by default.)
+#
+# You can also specify:
+#  - Specific addresses ("127.0.0.1:9150")
+#  - An automatically chosen port on an address ("127.0.0.1:auto")
+#  - An automatically chosen port on the loopback addresses ("auto")
+#  - A list of listening locations ([ 9150, "127.0.0.1:auto" ])
 #
 # Note that only one process can listen on a given port at a time.
+#
+# To disable socks listening entirely,
+# you can set this to 0, false, or "" (the empty string).
 socks_listen = 9150
 
-# Port to use to listen for DNS requests.  0 means disabled.
+# Port to use to listen for DNS requests.
+#
+# The syntax here is the same as for socks_listen.
 #dns_listen = 0
 
 # Configure logging
@@ -116,6 +127,18 @@ socks_listen = 9150
 #
 #     opentelemetry.http = {endpoint = "http://localhost:4318/v1/traces", timeout = "15s", batch = { max_queue_size = 1024, max_export_batch_size = 256, scheduled_delay = "5s" } }
 
+# If the experimental `tokio-console` feature is enabled, and you set this option to "true",
+# arti can send trace information to tokio-console` for development and debugging purposes.
+#
+# To use this feature, you must make sure to build with `--cfg tokio_unstable`,
+# or the console subscriber will panic on startup.
+#
+# Note that this option publishes low-level details at a local address that tokio-console
+# can connect to, and may therefore be a security risk on some systems.
+# Don't enable it for production environments; use containers when possible.
+#
+#     tokio_console.enabled = false
+
 [metrics]
 
 # Arti can export metrics, offering a Prometheus scraper endpoint.
@@ -147,6 +170,15 @@ socks_listen = 9150
 [storage]
 #cache_dir = "${ARTI_CACHE}"
 #state_dir = "${ARTI_LOCAL_DATA}"
+
+# A file in which to store a description of the proxy ports we're listening on.
+#
+# This is mostly useful if you've used "auto" in socks_listen, to find out
+# which ports were automatically chosen.
+#
+# The format of this JSON is documented in the Arti source,
+# in `crates/arti/src/proxy/port_info.rs`. (TODO: Replace with link.)
+#port_info_file = "${ARTI_LOCAL_DATA}/public/port_info.json"
 
 #[storage.keystore]
 # Whether the keystore is enabled.
@@ -417,7 +449,39 @@ socks_listen = 9150
 # List of directory authorities which we expect to sign consensus documents and
 # to download directory information from, if we are a directory mirror.
 #
-#   authorities = [ <default list is compiled-in > ]
+# Usually, you do not want to modify this setting unless you are running arti
+# in a test environment.
+#  [tor_network.authorities]
+#  # SHA1 fingerprints of the directory authority identity keys.
+#  v3idents = [
+#    [
+#      "0000000000000000000000000000000000000000"
+#    ]
+#  ]
+#  # IP addresses/ports for each authority to upload to (as a relay).
+#  uploads = [
+#    [
+#      # Each logical authority is grouped to support dual-stack.
+#      "198.51.100.0:80",
+#      "[2001:db8::1]:80"
+#    ]
+#  ]
+#  # IP addresses/ports for each authority to download from (as a dirmirror).
+#  downloads = [
+#    [
+#      # Each logical authority is grouped to support dual-stack.
+#      "198.51.100.0:80",
+#      "[2001:db8::1]:80"
+#    ]
+#  ]
+#  # IP addresses/ports for each authority to send votes to (as a dirauth).
+#  votes = [
+#    [
+#      # Each logical authority is grouped to support dual-stack.
+#      "198.51.100.0:80",
+#      "[2001:db8::1]:80"
+#    ]
+#  ]
 
 # Channels and their behaviour
 [channel]
@@ -435,13 +499,41 @@ socks_listen = 9150
 # by setting `override_net_params.nf_ito_low` et al.
 # (See torpsec/padding-spec.txt section 3.4.)
 
+# Configure an outbound proxy for connecting to the Tor network.
+#
+# If set, Arti will connect to the Tor network via this SOCKS proxy
+# instead of making direct connections to Tor relays.
+#
+# The proxy is specified as a URI string with the following formats:
+#   - socks4://host:port          - SOCKS4 proxy without authentication
+#   - socks4a://host:port         - SOCKS4a proxy (same as socks4)
+#   - socks5://host:port          - SOCKS5 proxy without authentication
+#   - socks5://user:pass@host:port - SOCKS5 proxy with username/password auth
+#
+# IPv6 addresses should be enclosed in brackets: socks5://[::1]:1080
+#
+# Examples:
+#   outbound_proxy = "socks5://127.0.0.1:1080"
+#   outbound_proxy = "socks5://user:pass@192.168.1.1:9050"
+#   outbound_proxy = "socks5://[::1]:1080"
+#
+# By default, no outbound proxy is used.
+#outbound_proxy = ""
+
 # Rules for how long circuits should survive, and how long pending
 # requests should wait for a circuit.
 [circuit_timing]
 
-# Once a circuit has been used for a request, we stop giving it out for
-# other requests after this time.
+# Once a circuit has been used for a weakly isolated request,
+# we stop giving it out for other requests after this time.
+#
+# (A request is weakly isolated if the application did not specify
+# an isolation string as part of the proxy handshake.)
 #max_dirtiness = "10 minutes"
+
+# If a circuit has only been used for strongly isolated requests,
+# we retain it until it has been idle for at least this long.
+#disused_circuit_timeout = "60 minutes"
 
 # When a circuit is requested, we keep trying to build circuits for up
 # to this long before the request gives up.
@@ -539,6 +631,12 @@ socks_listen = 9150
 #
 #    [onion_services."allium-cepa"]
 
+# Whether this service should be started. When this option is:
+#   * unset or set to true, the service will run with `arti proxy`.
+#   * set to false, the service will not run.
+#
+#    enabled = true
+
 # A description of what to do with incoming connections to different ports.
 # This is given as a list of rules; the first matching rule applies.
 #
@@ -562,7 +660,33 @@ socks_listen = 9150
 #
 #    num_intro_points = 3
 
+# A rate-limit on the acceptable rate of introduction requests.
+#
+# Consists of two parameters: the allowed client introduction rate per second
+# and maximum number of introductions in a single burst, which correspond to to the C Tor
+# HiddenServiceEnableIntroDoSRatePerSec and
+# HiddenServiceEnableIntroDoSBurstPerSec options, respectively.
+# If either of these parameters is set to 0, the defense is disabled,
+# and the introduction point will ignore the other parameter.
+#
+# We send this to the introduction point to configure how many
+# introduction requests it sends us.
+# If this is not set, the introduction point chooses a default based on
+# the current consensus.
+#
+# We do not enforce this limit ourselves.
+#
+# This configuration is sent as a `DOS_PARAMS` extension, as documented in
+# <https://spec.torproject.org/rend-spec/introduction-protocol.html#EST_INTRO_DOS_EXT>.
+#
+#   rate_limit_at_intro = [25, 200]
+
 # How many streams will we allow at a time for each circuit?
+#
+# If a client attempts to open more than this many streams on a rendezvous circuit,
+# the circuit will be torn down.
+#
+# Equivalent to C Tor's HiddenServiceMaxStreamsCloseCircuit option.
 #
 #    max_concurrent_streams_per_circuit = 65535
 
@@ -700,4 +824,3 @@ socks_listen = 9150
 # A space-separated list of protocols. Protocols have names like "Cons=4" or "Relay=3".
 #
 #ignore_missing_required_protocols = ""
-
