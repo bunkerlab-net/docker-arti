@@ -1,7 +1,7 @@
 ###################
 # --- builder --- #
 ###################
-FROM docker.io/rust:1.96-alpine@sha256:66f48b19d6e88519e2e58bebe0d945779a6a4ca41c2db17db78c9569655b50ac AS builder
+FROM docker.io/rust:1.96-alpine@sha256:2ea3db105d38fdfa4e31f366674287fcaa828087e2fe3973befdc537f2d443b1 AS builder
 
 RUN apk add --update git \
     musl-dev \
