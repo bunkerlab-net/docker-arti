@@ -29,9 +29,9 @@ jobs:
         arch: [amd64, arm64]
         include:
           - arch: amd64
-            runs-on: ubuntu-24.04
+            runs-on: ubuntu-26.04
           - arch: arm64
-            runs-on: ubuntu-24.04-arm
+            runs-on: ubuntu-26.04-arm
     steps:
       - run: lscpu
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -65,7 +65,7 @@ jobs:
   push:
     name: Push
     needs: build
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       packages: write
     steps:
